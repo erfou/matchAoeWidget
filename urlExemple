@@ -1,0 +1,18 @@
+Dernier match :
+https://aoe2.net/api/player/lastmatch?game=aoe2de&steam_id=76561198899171575
+Détails d'un joueur :
+https://aoe2.net/api/leaderboard?game=aoe2de&steam_id=76561198899171575
+
+
+
+{
+    'name':'',
+    'country':'',
+    'rank':'',
+    'rating':'',
+    'wins':'',
+    'looses':'',
+    'winrate':'',
+    'color':'',
+    'civilization':''
+}
