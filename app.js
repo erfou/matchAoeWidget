@@ -44,11 +44,9 @@ const server = http.createServer((req, res) => {
                     playersByTeams[currentPlayer.team] = new Array();
                 }
                 
-                    retrieveUserData(currentPlayer.steam_id).then(
-                        result => playersByTeams[currentPlayer.team].push(result),
-                        error => console.log(error)
-                    )
-                
+                retrieveUserData(currentPlayer.steam_id).then(function(result){
+                    playersByTeams[currentPlayer.team].push(result);
+                })
             });
 
             lastMatchInformations.last_match.players
@@ -73,43 +71,45 @@ server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 
-var retrieveUserData = new Promise(function (steamId, resolve, reject) {
-    var optionsget = {
-        host : 'aoe2.net', // here only the domain name
-        // (no http/https !)
-        port : 443,
-        headers: {
-            'Accept': 'application/json'
-        },
-        path : '/api/leaderboard?game=aoe2de&steam_id=' + steamId, // the rest of the url with parameters if needed
-        method : 'GET' // do GET
-    };
-
-    console.info('retrieveUserData Options prepared:');
-    console.info(optionsget);
-    console.info('retrieveUserData Do the GET call');
-
-    // do the GET request
-    var reqGet = https.request(optionsget, function(res) {
-        console.log("retrieveUserData statusCode: ", res.statusCode);
-
-        res.on('data', function(d) {
-            var user = {};
-            var receivedUserData = JSON.parse(d).leaderboard[0];
-            user.name = receivedUserData.name;
-            user.country = receivedUserData.country;
-            user.rank = receivedUserData.rank;
-            user.rating = receivedUserData.rating;
-            user.wins = receivedUserData.wins;
-            user.losses = receivedUserData.losses;
-            user.winrate = 100 * receivedUserData.wins / receivedUserData.games;
-            console.log('retrieveUserData user: ' + JSON.stringify(user));
-            resolve(JSON.stringify(user));
+var retrieveUserData = function(steamId) {
+    return new Promise(function (resolve, reject) {
+        var optionsget = {
+            host : 'aoe2.net', // here only the domain name
+            // (no http/https !)
+            port : 443,
+            headers: {
+                'Accept': 'application/json'
+            },
+            path : '/api/leaderboard?game=aoe2de&steam_id=' + steamId, // the rest of the url with parameters if needed
+            method : 'GET' // do GET
+        };
+    
+        console.info('retrieveUserData Options prepared:');
+        console.info(optionsget);
+        console.info('retrieveUserData Do the GET call');
+    
+        // do the GET request
+        var reqGet = https.request(optionsget, function(res) {
+            console.log("retrieveUserData statusCode: ", res.statusCode);
+    
+            res.on('data', function(d) {
+                var user = {};
+                var receivedUserData = JSON.parse(d).leaderboard[0];
+                user.name = receivedUserData.name;
+                user.country = receivedUserData.country;
+                user.rank = receivedUserData.rank;
+                user.rating = receivedUserData.rating;
+                user.wins = receivedUserData.wins;
+                user.losses = receivedUserData.losses;
+                user.winrate = 100 * receivedUserData.wins / receivedUserData.games;
+                console.log('retrieveUserData user: ' + JSON.stringify(user));
+                resolve(JSON.stringify(user));
+            });
         });
-    });
-
-    reqGet.end();
-    reqGet.on('error', function(e) {
-        reject(e);
-    });
-});
+    
+        reqGet.end();
+        reqGet.on('error', function(e) {
+            reject(e);
+        });
+    
+})};
